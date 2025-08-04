@@ -1,84 +1,58 @@
 {
-  "openapi": "3.0.3",
+  "openapi": "3.1.0",
   "info": {
-    "title": "WebhookX Admin API",
-    "contact": {
-      "name": "WebhookX",
-      "url": "https://github.com/webhookx-io/webhookx"
-    },
+    "title": "OpenAPI Plant Store",
+    "description": "A sample API that uses a plant store as an example to demonstrate features in the OpenAPI specification",
     "license": {
-      "name": "Apache 2.0",
-      "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
+      "name": "MIT"
     },
-    "version": "0.8.0"
+    "version": "1.0.0"
   },
   "servers": [
     {
-      "url": "http://localhost:8080"
+      "url": "http://sandbox.mintlify.com"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
     }
   ],
   "paths": {
-    "/": {
+    "/plants": {
       "get": {
-        "summary": "Get WebhookX information",
+        "description": "Returns all plants from the system that the user has access to",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "The maximum number of results to return",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Plant response",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "version": {
-                      "type": "string"
-                    }
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Plant"
                   }
-                },
-                "example": {
-                  "version": "1.0.0"
                 }
               }
             }
-          }
-        }
-      }
-    },
-    "/workspaces": {
-      "get": {
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/page_no"
           },
-          {
-            "$ref": "#/components/parameters/page_size"
-          }
-        ],
-        "summary": "Page workspaces",
-        "tags": [
-          "Workspace"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
+          "400": {
+            "description": "Unexpected error",
             "content": {
               "application/json": {
                 "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/Pagination"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "data": {
-                          "type": "array",
-                          "items": {
-                            "$ref": "#/components/schemas/Workspace"
-                          }
-                        }
-                      }
-                    }
-                  ]
+                  "$ref": "#/components/schemas/Error"
                 }
               }
             }
@@ -86,26 +60,35 @@
         }
       },
       "post": {
-        "summary": "Create a workspace",
-        "tags": [
-          "Workspace"
-        ],
+        "description": "Creates a new plant in the store",
         "requestBody": {
+          "description": "Plant to add to the store",
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Workspace"
+                "$ref": "#/components/schemas/NewPlant"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
-          "201": {
-            "description": "OK",
+          "200": {
+            "description": "plant response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Workspace"
+                  "$ref": "#/components/schemas/Plant"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
                 }
               }
             }
@@ -113,1458 +96,121 @@
         }
       }
     },
-    "/workspaces/{id}": {
-      "get": {
-        "summary": "Retrieve a workspace",
-        "tags": [
-          "Workspace"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Workspace"
-                }
-              }
-            }
-          }
-        }
-      },
-      "put": {
-        "summary": "Update a workspace",
-        "tags": [
-          "Workspace"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Workspace"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Workspace"
-                }
-              }
-            }
-          }
-        }
-      },
+    "/plants/{id}": {
       "delete": {
-        "summary": "Delete a workspace",
-        "tags": [
-          "Workspace"
-        ],
+        "description": "Deletes a single plant based on the ID supplied",
         "parameters": [
           {
-            "in": "path",
             "name": "id",
+            "in": "path",
+            "description": "ID of plant to delete",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "integer",
+              "format": "int64"
             }
           }
         ],
         "responses": {
           "204": {
-            "description": "Deleted"
-          }
-        }
-      }
-    },
-    "/workspaces/{ws_id}/endpoints": {
-      "parameters": [
-        {
-          "$ref": "#/components/parameters/workspace_id"
-        }
-      ],
-      "get": {
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/page_no"
+            "description": "Plant deleted",
+            "content": {}
           },
-          {
-            "$ref": "#/components/parameters/page_size"
-          }
-        ],
-        "summary": "Page endpoints",
-        "tags": [
-          "Endpoint"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
+          "400": {
+            "description": "unexpected error",
             "content": {
               "application/json": {
                 "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/Pagination"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "data": {
-                          "type": "array",
-                          "items": {
-                            "$ref": "#/components/schemas/Endpoint"
-                          }
-                        }
-                      }
-                    }
-                  ]
+                  "$ref": "#/components/schemas/Error"
                 }
               }
             }
           }
         }
-      },
+      }
+    }
+  },
+  "webhooks": {
+    "/plant/webhook": {
       "post": {
-        "tags": [
-          "Endpoint"
-        ],
-        "summary": "Create a endpoint",
+        "description": "Information about a new plant added to the store",
         "requestBody": {
+          "description": "Plant added to the store",
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Endpoint"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Endpoint"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/workspaces/{ws_id}/endpoints/{id}": {
-      "parameters": [
-        {
-          "$ref": "#/components/parameters/workspace_id"
-        }
-      ],
-      "get": {
-        "summary": "Retrieve a endpoint",
-        "tags": [
-          "Endpoint"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Endpoint"
-                }
-              }
-            }
-          }
-        }
-      },
-      "put": {
-        "summary": "Update a endpoint",
-        "tags": [
-          "Endpoint"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Endpoint"
+                "$ref": "#/components/schemas/NewPlant"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Endpoint"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "summary": "Delete a endpoint",
-        "tags": [
-          "Endpoint"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Deleted"
-          }
-        }
-      }
-    },
-    "/workspaces/{ws_id}/attempts": {
-      "parameters": [
-        {
-          "$ref": "#/components/parameters/workspace_id"
-        }
-      ],
-      "get": {
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/page_no"
-          },
-          {
-            "$ref": "#/components/parameters/page_size"
-          },
-          {
-            "in": "query",
-            "name": "event_id",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "endpoint_id",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "summary": "Page webhook attempts",
-        "tags": [
-          "Attempt"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/Pagination"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "data": {
-                          "type": "array",
-                          "items": {
-                            "$ref": "#/components/schemas/Attempt"
-                          }
-                        }
-                      }
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/workspaces/{ws_id}/attempts/{id}": {
-      "parameters": [
-        {
-          "$ref": "#/components/parameters/workspace_id"
-        }
-      ],
-      "get": {
-        "summary": "Retrieve a webhook attempt",
-        "tags": [
-          "Attempt"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Attempt"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/workspaces/{ws_id}/events": {
-      "parameters": [
-        {
-          "$ref": "#/components/parameters/workspace_id"
-        }
-      ],
-      "get": {
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/page_no"
-          },
-          {
-            "$ref": "#/components/parameters/page_size"
-          }
-        ],
-        "summary": "Page events",
-        "tags": [
-          "Event"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/Pagination"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "data": {
-                          "type": "array",
-                          "items": {
-                            "$ref": "#/components/schemas/Event"
-                          }
-                        }
-                      }
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "summary": "Create an event",
-        "tags": [
-          "Event"
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Event"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Event"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/workspaces/{ws_id}/events/{id}": {
-      "parameters": [
-        {
-          "$ref": "#/components/parameters/workspace_id"
-        }
-      ],
-      "get": {
-        "summary": "Retrieve an event",
-        "tags": [
-          "Event"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Event"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/workspaces/{ws_id}/events/{id}/retry": {
-      "parameters": [
-        {
-          "$ref": "#/components/parameters/workspace_id"
-        }
-      ],
-      "post": {
-        "summary": "Manually retry an event",
-        "tags": [
-          "Event"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "endpoint_id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/workspaces/{ws_id}/sources": {
-      "parameters": [
-        {
-          "$ref": "#/components/parameters/workspace_id"
-        }
-      ],
-      "get": {
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/page_no"
-          },
-          {
-            "$ref": "#/components/parameters/page_size"
-          }
-        ],
-        "summary": "Page sources",
-        "tags": [
-          "Source"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/Pagination"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "data": {
-                          "type": "array",
-                          "items": {
-                            "$ref": "#/components/schemas/Source"
-                          }
-                        }
-                      }
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "summary": "Create a source",
-        "tags": [
-          "Source"
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Source"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Source"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/workspaces/{ws_id}/source/{id}": {
-      "parameters": [
-        {
-          "$ref": "#/components/parameters/workspace_id"
-        }
-      ],
-      "get": {
-        "summary": "Retrieve a source",
-        "tags": [
-          "Source"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Source"
-                }
-              }
-            }
-          }
-        }
-      },
-      "put": {
-        "summary": "Update a source",
-        "tags": [
-          "Source"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Source"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Source"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "summary": "Delete a source",
-        "tags": [
-          "Source"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Deleted"
-          }
-        }
-      }
-    },
-    "/workspaces/{ws_id}/plugins": {
-      "parameters": [
-        {
-          "$ref": "#/components/parameters/workspace_id"
-        }
-      ],
-      "get": {
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/page_no"
-          },
-          {
-            "$ref": "#/components/parameters/page_size"
-          }
-        ],
-        "summary": "Page plugins",
-        "tags": [
-          "Plugin"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/Pagination"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "data": {
-                          "type": "array",
-                          "items": {
-                            "$ref": "#/components/schemas/Plugin"
-                          }
-                        }
-                      }
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "summary": "Create a plugin",
-        "tags": [
-          "Plugin"
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Plugin"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Plugin"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/workspaces/{ws_id}/plugins/{id}": {
-      "parameters": [
-        {
-          "$ref": "#/components/parameters/workspace_id"
-        }
-      ],
-      "get": {
-        "summary": "Retrieve a plugin",
-        "tags": [
-          "Plugin"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Plugin"
-                }
-              }
-            }
-          }
-        }
-      },
-      "put": {
-        "summary": "Update a plugin",
-        "tags": [
-          "Plugin"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Plugin"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Plugin"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "summary": "Delete a plugin",
-        "tags": [
-          "Plugin"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Deleted"
-          }
-        }
-      }
-    },
-    "/workspaces/{ws_id}/config/sync": {
-      "post": {
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/workspace_id"
-          }
-        ],
-        "summary": "Sync declarative configuration",
-        "tags": [
-          "Declarative"
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Configuration"
-              }
-            },
-            "application/x-yaml": {
-              "schema": {
-                "$ref": "#/components/schemas/Configuration"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/workspaces/{ws_id}/config/dump": {
-      "post": {
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/workspace_id"
-          }
-        ],
-        "summary": "Dump declarative configuration",
-        "tags": [
-          "Declarative"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/debug/pprof/": {
-      "get": {
-        "summary": "Responds the pprof html page listing the available profiles",
-        "tags": [
-          "Debug"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/html": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/debug/pprof/{profile}": {
-      "get": {
-        "summary": "Responds a specific pprof profile",
-        "tags": [
-          "Debug"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "profile",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "enum": [
-                "allocs",
-                "block",
-                "goroutine",
-                "heap",
-                "mutex",
-                "threadcreate",
-                "cmdline",
-                "symbol",
-                "profile",
-                "trace"
-              ]
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
+            "description": "Return a 200 status to indicate that the data was received successfully"
           }
         }
       }
     }
   },
   "components": {
-    "parameters": {
-      "workspace_id": {
-        "in": "path",
-        "name": "ws_id",
-        "required": true,
-        "schema": {
-          "type": "string",
-          "example": "default"
-        },
-        "description": "The workspace id"
-      },
-      "page_no": {
-        "in": "query",
-        "name": "page_no",
-        "schema": {
-          "type": "integer",
-          "default": 1
-        }
-      },
-      "page_size": {
-        "in": "query",
-        "name": "page_size",
-        "schema": {
-          "type": "integer",
-          "default": 20
-        }
-      }
-    },
-    "responses": {
-      "NotFound": {
-        "description": "The resource was not found"
-      },
-      "NotContent": {
-        "description": "The resource has been successfully deleted or the resource didn't exist"
-      }
-    },
     "schemas": {
-      "Pagination": {
-        "properties": {
-          "total": {
-            "type": "integer",
-            "example": 1
-          }
-        }
-      },
-      "Metadata": {
-        "type": "object",
-        "additionalProperties": {
-          "type": "string"
-        },
-        "default": {
-        }
-      },
-      "Workspace": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string",
-            "nullable": true
-          },
-          "description": {
-            "type": "string",
-            "nullable": true
-          },
-          "metadata": {
-            "$ref": "#/components/schemas/Metadata"
-          },
-          "created_at": {
-            "type": "integer",
-            "readOnly": true
-          },
-          "updated_at": {
-            "type": "integer",
-            "readOnly": true
-          }
-        }
-      },
-      "Endpoint": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string",
-            "nullable": true
-          },
-          "description": {
-            "type": "string",
-            "nullable": true
-          },
-          "enabled": {
-            "type": "boolean",
-            "default": true
-          },
-          "request": {
-            "type": "object",
-            "default": {
-              "method": "POST",
-              "headers": null,
-              "timeout": 10000
-            },
-            "properties": {
-              "url": {
-                "type": "string",
-                "minLength": 1,
-                "example": "https://example.com"
-              },
-              "method": {
-                "type": "string",
-                "enum": [
-                  "GET",
-                  "POST",
-                  "PUT",
-                  "DELETE",
-                  "PATCH"
-                ],
-                "default": "POST"
-              },
-              "headers": {
-                "type": "object",
-                "nullable": true,
-                "additionalProperties": {
-                  "type": "string"
-                },
-                "default": null
-              },
-              "timeout": {
-                "type": "integer",
-                "minimum": 0,
-                "maximum": 60000,
-                "default": 10000
-              }
-            },
-            "required": [
-              "url"
-            ]
-          },
-          "retry": {
-            "type": "object",
-            "default": {
-              "strategy": "fixed",
-              "config": {
-                "attempts": [
-                  0,
-                  60,
-                  3600
-                ]
-              }
-            },
-            "properties": {
-              "strategy": {
-                "type": "string",
-                "enum": [
-                  "fixed"
-                ],
-                "default": "fixed"
-              },
-              "config": {
-                "type": "object",
-                "default": {
-                  "attempts": [
-                    0,
-                    60,
-                    3600
-                  ]
-                },
-                "properties": {
-                  "attempts": {
-                    "type": "array",
-                    "minItems": 1,
-                    "items": {
-                      "type": "integer",
-                      "minimum": 0
-                    },
-                    "default": [
-                      0,
-                      60,
-                      3600
-                    ]
-                  }
-                }
-              }
-            }
-          },
-          "events": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "example": "foo.bar"
-            },
-            "default": [
-
-            ]
-          },
-          "metadata": {
-            "$ref": "#/components/schemas/Metadata"
-          },
-          "created_at": {
-            "type": "integer",
-            "readOnly": true
-          },
-          "updated_at": {
-            "type": "integer",
-            "readOnly": true
-          }
-        }
-      },
-      "Attempt": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "event_id": {
-            "type": "string"
-          },
-          "endpoint_id": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "INIT",
-              "QUEUED",
-              "SUCCESSFUL",
-              "FAILED",
-              "CANCELED"
-            ]
-          },
-          "attempt_number": {
-            "type": "integer"
-          },
-          "scheduled_at": {
-            "type": "integer"
-          },
-          "attempted_at": {
-            "type": "integer",
-            "nullable": true
-          },
-          "trigger_mode": {
-            "type": "string",
-            "enum": [
-              "INITIAL",
-              "MANUAL",
-              "AUTOMATIC"
-            ]
-          },
-          "exhausted": {
-            "type": "boolean"
-          },
-          "error_code": {
-            "type": "string",
-            "nullable": true,
-            "enum": [
-              "TIMEOUT",
-              "UNKNOWN",
-              "ENDPOINT_DISABLED",
-              "ENDPOINT_NOT_FOUND"
-            ]
-          },
-          "request": {
-            "type": "object",
-            "nullable": true,
-            "properties": {
-              "method": {
-                "type": "string"
-              },
-              "url": {
-                "type": "string"
-              },
-              "headers": {
-                "type": "object",
-                "nullable": true
-              },
-              "body": {
-                "type": "string",
-                "nullable": true
-              }
-            }
-          },
-          "response": {
-            "type": "object",
-            "nullable": true,
-            "properties": {
-              "status": {
-                "type": "number"
-              },
-              "latency": {
-                "type": "integer",
-                "description": "Latancy of response in milliseconds"
-              },
-              "headers": {
-                "type": "object",
-                "nullable": true
-              },
-              "body": {
-                "type": "string",
-                "nullable": true
-              }
-            }
-          },
-          "created_at": {
-            "type": "integer",
-            "readOnly": true
-          },
-          "updated_at": {
-            "type": "integer",
-            "readOnly": true
-          }
-        }
-      },
-      "Event": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "event_type": {
-            "type": "string"
-          },
-          "data": {
-            "type": "object"
-          },
-          "ingested_at": {
-            "type": "integer",
-            "description": "The time the event was ingested"
-          },
-          "created_at": {
-            "type": "integer",
-            "readOnly": true
-          },
-          "updated_at": {
-            "type": "integer",
-            "readOnly": true
-          }
-        },
+      "Plant": {
         "required": [
-          "event_type",
-          "data"
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "The name of the plant",
+            "type": "string"
+          },
+          "tag": {
+            "description": "Tag to specify the type",
+            "type": "string"
+          }
+        }
+      },
+      "NewPlant": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Plant"
+          },
+          {
+            "required": [
+              "id"
+            ],
+            "type": "object",
+            "properties": {
+              "id": {
+                "description": "Identification number of the plant",
+                "type": "integer",
+                "format": "int64"
+              }
+            }
+          }
         ]
       },
-      "Source": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string",
-            "nullable": true
-          },
-          "enabled": {
-            "type": "boolean",
-            "default": true
-          },
-          "path": {
-            "type": "string"
-          },
-          "methods": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "enum": [
-                "GET",
-                "POST",
-                "PUT",
-                "DELETE",
-                "PATCH"
-              ]
-            },
-            "minItems": 1
-          },
-          "async": {
-            "type": "boolean",
-            "description": "Whether to ingest events asynchronously through the queue",
-            "default": false
-          },
-          "response": {
-            "type": "object",
-            "nullable": true,
-            "properties": {
-              "code": {
-                "type": "integer",
-                "minimum": 200,
-                "maximum": 599
-              },
-              "content_type": {
-                "type": "string"
-              },
-              "body": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "code",
-              "content_type"
-            ]
-          },
-          "metadata": {
-            "$ref": "#/components/schemas/Metadata"
-          },
-          "created_at": {
-            "type": "integer",
-            "readOnly": true
-          },
-          "updated_at": {
-            "type": "integer",
-            "readOnly": true
-          }
-        },
+      "Error": {
         "required": [
-          "path",
-          "methods"
-        ]
-      },
-      "Plugin": {
+          "error",
+          "message"
+        ],
         "type": "object",
         "properties": {
-          "id": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "enabled": {
-            "type": "boolean",
-            "default": true
-          },
-          "endpoint_id": {
-            "type": "string",
-            "nullable": true
-          },
-          "source_id": {
-            "type": "string",
-            "nullable": true
-          },
-          "config": {
-            "type": "object",
-            "nullable": true
-          },
-          "metadata": {
-            "$ref": "#/components/schemas/Metadata"
-          },
-          "created_at": {
+          "error": {
             "type": "integer",
-            "readOnly": true
+            "format": "int32"
           },
-          "updated_at": {
-            "type": "integer",
-            "readOnly": true
+          "message": {
+            "type": "string"
           }
         }
-      },
-      "Configuration": {
-        "type": "object",
-        "properties": {
-          "endpoints": {
-            "type": "array",
-            "items": {
-              "allOf": [
-                {
-                  "$ref": "#/components/schemas/Endpoint"
-                },
-                {
-                  "type": "object",
-                  "properties": {
-                    "plugins": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/Plugin"
-                      }
-                    }
-                  }
-                }
-              ]
-            }
-          },
-          "sources": {
-            "type": "array",
-            "items": {
-              "allOf": [
-                {
-                  "$ref": "#/components/schemas/Source"
-                },
-                {
-                  "type": "object",
-                  "properties": {
-                    "plugins": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/Plugin"
-                      }
-                    }
-                  }
-                }
-              ]
-            }
-          }
-        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer"
       }
     }
   }
