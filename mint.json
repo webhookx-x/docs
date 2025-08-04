@@ -75,12 +75,8 @@
       ]
     },
     {
-      "group": "API Documentation",
-       "openapi": {
-          "source": "openapi.json",
-          "directory": "api-reference"
-        }
-    },    
+      "group": "API Documentation2"
+    },
     {
       "group": "Endpoint Examples",
       "pages": [
