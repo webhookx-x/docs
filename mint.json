@@ -5,6 +5,7 @@
     "dark": "/logo/dark.svg",
     "light": "/logo/light.svg"
   },
+  "openapi": "https://petstore3.swagger.io/api/v3/openapi.json",
   "favicon": "/favicon.svg",
   "colors": {
     "primary": "#0D9373",
@@ -73,9 +74,6 @@
       "pages": [
         "api-reference/introduction"
       ]
-    },
-    {
-      "group": "API Documentation2"
     },
     {
       "group": "Endpoint Examples",
